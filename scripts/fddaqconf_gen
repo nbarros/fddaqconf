@@ -8,7 +8,6 @@ from os.path import exists, abspath, dirname, basename
 from pathlib import Path
 
 from daqconf.core.console import console
-
 # console.log("daqconf - loading base modules")
 
 from daqconf.core.system import System
@@ -47,13 +46,13 @@ def expand_conf(config_data, debug=False):
         _type_: _description_
     """
 
-    import dunedaq.daqconf.confgen as confgen
+    import dunedaq.fddaqconf.confgen as confgen
     import dunedaq.daqconf.bootgen as bootgen
     import dunedaq.daqconf.detectorgen as detectorgen
     import dunedaq.daqconf.daqcommongen as daqcommongen
     import dunedaq.daqconf.timinggen as timinggen
     import dunedaq.daqconf.hsigen as hsigen
-    import dunedaq.daqconf.readoutgen as readoutgen
+    import dunedaq.fddaqconf.readoutgen as readoutgen
     import dunedaq.daqconf.triggergen as triggergen
     import dunedaq.daqconf.dataflowgen as dataflowgen
     import dunedaq.daqconf.dqmgen as dqmgen
@@ -183,7 +182,7 @@ def create_df_apps(
 # Add -h as default help option
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
-@generate_cli_from_schema('daqconf/confgen.jsonnet', 'daqconf_multiru_gen', 'daqconf.dataflowgen.dataflowapp')
+@generate_cli_from_schema('fddaqconf/confgen.jsonnet', 'fddaqconf_gen', 'daqconf.dataflowgen.dataflowapp')
 @click.option('--force-pm', default=None, type=click.Choice(['ssh', 'k8s']), help="Force process manager")
 @click.option('--base-command-port', type=int, default=None, help="Base port of application command endpoints")
 @click.option('-m', '--detector-readout-map-file', default=None, help="File containing detector detector-readout map for configuration to run")
@@ -231,10 +230,10 @@ def cli(
         debug_dir.mkdir(parents=True)
 
     config_data = config[0]
-    config_file = Path(config[1] if config[1] is not None else "daqconf_default.json")
+    config_file = Path(config[1] if config[1] is not None else "fddaqconf_default.json")
 
     if debug:
-        console.log(f"Configuration for daqconf: {config_data.pod()}")
+        console.log(f"Configuration for fddaqconf: {config_data.pod()}")
 
     (
         boot,
@@ -290,7 +289,8 @@ def cli(
         console.log("Loading dqm config generator")
         from daqconf.apps.dqm_gen import get_dqm_app
     console.log("Loading readout config generator")
-    from daqconf.apps.readout_gen import create_fake_readout_app, ReadoutAppGenerator
+    from daqconf.apps.readout_gen import create_fake_readout_app
+    from fddaqconf.apps.readout_gen import FDReadoutAppGenerator	
     console.log("Loading trigger config generator")
     from daqconf.apps.trigger_gen import get_trigger_app
     console.log("Loading DFO config generator")
@@ -490,7 +490,7 @@ def cli(
     #--------------------------------------------------------------------------
     # Readout generation
     #--------------------------------------------------------------------------
-    roapp_gen = ReadoutAppGenerator(readout, detector, daq_common)
+    roapp_gen = FDReadoutAppGenerator(readout, detector, daq_common)
     for ru_i,(ru_name, ru_desc) in enumerate(ru_descs.items()):
 
         #--------------------------------------------------------------------------
@@ -765,17 +765,17 @@ def cli(
 
 
     if not dry_run:
-        import dunedaq.daqconf.confgen as confgen
+        import dunedaq.fddaqconf.confgen as confgen
 
         write_json_files(app_command_datas, system_command_datas, output_dir, verbose=debug)
 
         console.log(f"MDAapp config generated in {output_dir}")
 
-        write_metadata_file(output_dir, "daqconf_multiru_gen", config_file.as_posix())
+        write_metadata_file(output_dir, "fddaqconf_gen", config_file.as_posix())
         write_config_file(
             output_dir,
             config_file.name if config_file else "default.json",
-            confgen.daqconf_multiru_gen(  # :facepalm:
+            confgen.fddaqconf_gen(  # :facepalm:
                 boot = boot,
                 detector = detector,
                 daq_common = daq_common,
