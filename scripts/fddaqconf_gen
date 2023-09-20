@@ -15,7 +15,6 @@ from daqconf.core.metadata import write_metadata_file, write_config_file
 from daqconf.core.sourceid import SourceIDBroker #, get_tpg_mode
 from daqconf.core.config_file import generate_cli_from_schema
 from daqconf.core.assets import resolve_asset_file
-# from detchannelmaps._daq_detchannelmaps_py import HardwareMapService
 from detdataformats import *
 
 import daqconf.detreadoutmap as dromap
@@ -26,12 +25,6 @@ import daqconf.detreadoutmap as dromap
 # from dunedaq.env import get_moo_model_path
 # import moo.io
 # moo.io.default_load_path = get_moo_model_path()
-
-# Load configuration types
-# import moo.otypes
-
-# moo.otypes.load_types('detchannelmaps/hardwaremapservice.jsonnet')
-# import dunedaq.detchannelmaps.hardwaremapservice as hwms
 
 
 def expand_conf(config_data, debug=False):
