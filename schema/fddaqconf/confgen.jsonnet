@@ -1,4 +1,4 @@
-// This is the configuration schema for daqconf_multiru_gen
+// This is the configuration schema for fddaqconf_gen
 //
 
 local moo = import "moo.jsonnet";
@@ -25,8 +25,8 @@ local timinggen = moo.oschema.hier(stiming).dunedaq.daqconf.timinggen;
 local shsi = import "daqconf/hsigen.jsonnet";
 local hsigen = moo.oschema.hier(shsi).dunedaq.daqconf.hsigen;
 
-local sreadout = import "daqconf/readoutgen.jsonnet";
-local readoutgen = moo.oschema.hier(sreadout).dunedaq.daqconf.readoutgen;
+local sreadout = import "fddaqconf/readoutgen.jsonnet";
+local readoutgen = moo.oschema.hier(sreadout).dunedaq.fddaqconf.readoutgen;
 
 local strigger = import "daqconf/triggergen.jsonnet";
 local triggergen = moo.oschema.hier(strigger).dunedaq.daqconf.triggergen;
@@ -37,7 +37,7 @@ local dataflowgen = moo.oschema.hier(sdataflow).dunedaq.daqconf.dataflowgen;
 local sdqm = import "daqconf/dqmgen.jsonnet";
 local dqmgen = moo.oschema.hier(sdqm).dunedaq.daqconf.dqmgen;
 
-local s = moo.oschema.schema("dunedaq.daqconf.confgen");
+local s = moo.oschema.schema("dunedaq.fddaqconf.confgen");
 local nc = moo.oschema.numeric_constraints;
 // A temporary schema construction context.
 
@@ -83,7 +83,7 @@ local cs = {
   ]),
 
 
-  daqconf_multiru_gen: s.record('daqconf_multiru_gen', [
+  fddaqconf_gen: s.record('fddaqconf_gen', [
     s.field('detector',    detectorgen.detector,   default=detectorgen.detector,     doc='Boot parameters'),
     s.field('daq_common',  daqcommongen.daq_common, default=daqcommongen.daq_common,   doc='DAQ common parameters'),
     s.field('boot',        bootgen.boot,    default=bootgen.boot,      doc='Boot parameters'),
