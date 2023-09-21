@@ -282,8 +282,7 @@ def cli(
         console.log("Loading dqm config generator")
         from daqconf.apps.dqm_gen import get_dqm_app
     console.log("Loading readout config generator")
-    from daqconf.apps.readout_gen import create_fake_readout_app
-    from fddaqconf.apps.readout_gen import FDReadoutAppGenerator	
+    from fddaqconf.apps.readout_gen import create_fake_readout_app, FDReadoutAppGenerator	
     console.log("Loading trigger config generator")
     from daqconf.apps.trigger_gen import get_trigger_app
     console.log("Loading DFO config generator")
