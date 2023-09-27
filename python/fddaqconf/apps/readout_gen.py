@@ -437,8 +437,8 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
                 flx_mods, flx_queues = self.create_felix_cardreader(
                     # FRONTEND_TYPE=FRONTEND_TYPE,
                     # QUEUE_FRAGMENT_TYPE=QUEUE_FRAGMENT_TYPE,
-                    CARD_ID_OVERRIDE=card_override,
-                    NUMA_ID=numa_id,
+                    CARD_ID_OVERRIDE=self.card_override,
+                    NUMA_ID=self.numa_id,
                     RU_DESCRIPTOR=RU_DESCRIPTOR
                 )
                 cr_mods += flx_mods
