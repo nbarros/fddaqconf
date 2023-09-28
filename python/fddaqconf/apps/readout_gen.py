@@ -234,6 +234,23 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
         return modules, queues
 
 
+    def get_numa_cfg(self, RU_DESCRIPTOR):
+
+        cfg = self.ro_cfg
+        try:
+            ex = self.numa_excpt[(RU_DESCRIPTOR.host_name, RU_DESCRIPTOR.iface)]
+            numa_id = ex['numa_id']
+            latency_numa = ex['latency_buffer_numa_aware']
+            latency_preallocate = ex['latency_buffer_preallocation']
+            flx_card_override = ex['felix_card_id']
+        except KeyError:
+            numa_id = cfg.numa_config['default_id']
+            latency_numa = cfg.numa_config['default_latency_numa_aware']
+            latency_preallocate = cfg.numa_config['default_latency_preallocation']
+            flx_card_override = -1
+        return (numa_id, latency_numa, latency_preallocate, flx_card_override)
+
+
 
     ###
     # FELIX Card Reader creator
@@ -242,7 +259,7 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
             self,
             # FRONTEND_TYPE: str,
             # QUEUE_FRAGMENT_TYPE: str,
-            CARD_ID_OVERRIDE: int,
+            # CARD_ID_OVERRIDE: int,
             NUMA_ID: int,
             RU_DESCRIPTOR # ReadoutUnitDescriptor
         ) -> tuple[list, list]:
@@ -266,7 +283,14 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
         links_slr0.sort()
         links_slr1.sort()
 
-        card_id = RU_DESCRIPTOR.iface if CARD_ID_OVERRIDE == -1 else CARD_ID_OVERRIDE
+        try:
+            ex = self.numa_excpt[(RU_DESCRIPTOR.host_name, RU_DESCRIPTOR.iface)]
+            CARD_OVERRIDE = ex['felix_card_id']
+        except KeyError:
+            CARD_OVERRIDE = -1
+
+
+        card_id = RU_DESCRIPTOR.iface if CARD_OVERRIDE == -1 else CARD_OVERRIDE
 
         modules = []
         queues = []
@@ -392,7 +416,7 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
                 flx_mods, flx_queues = self.create_felix_cardreader(
                     # FRONTEND_TYPE=FRONTEND_TYPE,
                     # QUEUE_FRAGMENT_TYPE=QUEUE_FRAGMENT_TYPE,
-                    CARD_ID_OVERRIDE=self.card_override,
+                    # CARD_ID_OVERRIDE=self.card_override,
                     NUMA_ID=self.numa_id,
                     RU_DESCRIPTOR=RU_DESCRIPTOR
                 )
