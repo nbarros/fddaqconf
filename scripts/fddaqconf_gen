@@ -421,7 +421,6 @@ def cli(
             detector = detector,
             source_id = timing_hsi_source_id,
             daq_common = daq_common,
-            timing_session_name = timing.timing_session_name,
             DEBUG=debug
             )
         if debug: console.log("timing hsi cmd data:", the_system.apps["timinghsi"])
