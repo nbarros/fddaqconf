@@ -33,97 +33,7 @@ from daqconf.apps.readout_gen import ReadoutAppGenerator
 # from detdataformats._daq_detdataformats_py import *
 from detdataformats import DetID
 
-
-## Compute the frament types from detector infos
-def compute_data_types(
-        stream_entry
-    ):
-    det_str = DetID.subdetector_to_string(DetID.Subdetector(stream_entry.geo_id.det_id))
-
-
-    # Far detector types
-    if (det_str in ("HD_TPC","VD_Bottom_TPC") and stream_entry.kind=='flx' ):
-        fe_type = "wib2"
-        queue_frag_type="WIB2Frame"
-        fakedata_frag_type = "WIB"
-        fakedata_time_tick=32
-        fakedata_frame_size=472
-    elif (det_str in ("HD_TPC","VD_Bottom_TPC") and stream_entry.kind=='eth' ):
-        fe_type = "wibeth"
-        queue_frag_type="WIBEthFrame"
-        fakedata_frag_type = "WIBEth"
-        fakedata_time_tick=2048
-        fakedata_frame_size=7200
-    elif det_str in ("HD_PDS", "VD_Cathode_PDS", "VD_Membrane_PDS") and stream_entry.parameters.mode == "var_rate":
-        fe_type = "pds"
-        fakedata_frag_type = "DAPHNE"
-        queue_frag_type = "PDSFrame"
-        fakedata_time_tick=None
-        fakedata_frame_size=472
-    elif det_str in ("HD_PDS", "VD_Cathode_PDS", "VD_Membrane_PDS") and  stream_entry.parameters.mode == "fix_rate":
-        fe_type = "pds_stream"
-        fakedata_frag_type = "DAPHNE"
-        queue_frag_type = "PDSStreamFrame"
-        fakedata_time_tick=None
-        fakedata_frame_size=472
-    elif det_str == "VD_Top_TPC":
-        fe_type = "tde"
-        fakedata_frag_type = "TDE_AMC"
-        queue_frag_type = "TDEFrame"
-        fakedata_time_tick=4472*32
-        fakedata_frame_size=8972
-
-    else:
-        raise ValueError(f"No match for {det_str}, {stream_entry.kind}")
-
-
-    return fe_type, queue_frag_type, fakedata_frag_type, fakedata_time_tick, fakedata_frame_size
-
-
-###
-# Create Fake dataproducers Application
-###
-def create_fake_readout_app(
-    RU_DESCRIPTOR,
-    CLOCK_SPEED_HZ
-) -> App:
-    """
-    """
-    modules = []
-    queues = []
-
-    # _, _, fakedata_fragment_type, fakedata_time_tick, fakedata_frame_size = compute_data_types(RU_DESCRIPTOR.det_id, CLOCK_SPEED_HZ, RU_DESCRIPTOR.kind)
-
-    for stream in RU_DESCRIPTOR.streams:
-        _, _, fakedata_fragment_type, fakedata_time_tick, fakedata_frame_size = compute_data_types(stream)
-
-        modules += [DAQModule(name = f"fakedataprod_{stream.src_id}",
-                                plugin='FakeDataProd',
-                                conf = fdp.ConfParams(
-                                system_type = "Detector_Readout",
-                                source_id = stream.src_id,
-                                time_tick_diff = fakedata_time_tick,
-                                frame_size = fakedata_frame_size,
-                                response_delay = 0,
-                                fragment_type = fakedata_fragment_type,
-                                ))]
-
-    mgraph = ModuleGraph(modules, queues=queues)
-
-    for stream in RU_DESCRIPTOR.streams:
-        # Add fragment producers for fake data. This call is necessary to create the RequestReceiver instance, but we don't need the generated FragmentSender or its queues...
-        mgraph.add_fragment_producer(id = stream.src_id, subsystem = "Detector_Readout",
-                                        requests_in   = f"fakedataprod_{stream.src_id}.data_request_input_queue",
-                                        fragments_out = f"fakedataprod_{stream.src_id}.fragment_queue")
-        mgraph.add_endpoint(f"timesync_ru{RU_DESCRIPTOR.label}_{stream.src_id}", f"fakedataprod_{stream.src_id}.timesync_output",    "TimeSync",   Direction.OUT, is_pubsub=True, toposort=False)
-
-    # Create the application
-    readout_app = App(mgraph, host=RU_DESCRIPTOR.host_name)
-
-    # All done
-    return readout_app
-
-###
+#
 # DPDK Card Reader creator
 ###
 class NICReceiverBuilder:
@@ -224,6 +134,51 @@ QUEUE_POP_WAIT_MS = 10 # This affects stop time, as each link will wait this lon
 class FDReadoutAppGenerator(ReadoutAppGenerator):
     dlh_plugin = "FDDataLinkHandler"
 
+    ## Compute the frament types from detector infos
+    def compute_data_types(
+            self,
+            stream_entry
+    ):
+        det_str = DetID.subdetector_to_string(DetID.Subdetector(stream_entry.geo_id.det_id))
+        
+
+        # Far detector types
+        if (det_str in ("HD_TPC","VD_Bottom_TPC") and stream_entry.kind=='flx' ):
+            fe_type = "wib2"
+            queue_frag_type="WIB2Frame"
+            fakedata_frag_type = "WIB"
+            fakedata_time_tick=32
+            fakedata_frame_size=472
+        elif (det_str in ("HD_TPC","VD_Bottom_TPC") and stream_entry.kind=='eth' ):
+            fe_type = "wibeth"
+            queue_frag_type="WIBEthFrame"
+            fakedata_frag_type = "WIBEth"
+            fakedata_time_tick=2048
+            fakedata_frame_size=7200
+        elif det_str in ("HD_PDS", "VD_Cathode_PDS", "VD_Membrane_PDS") and stream_entry.parameters.mode == "var_rate":
+            fe_type = "pds"
+            fakedata_frag_type = "DAPHNE"
+            queue_frag_type = "PDSFrame"
+            fakedata_time_tick=None
+            fakedata_frame_size=472
+        elif det_str in ("HD_PDS", "VD_Cathode_PDS", "VD_Membrane_PDS") and  stream_entry.parameters.mode == "fix_rate":
+            fe_type = "pds_stream"
+            fakedata_frag_type = "DAPHNE"
+            queue_frag_type = "PDSStreamFrame"
+            fakedata_time_tick=None
+            fakedata_frame_size=472
+        elif det_str == "VD_Top_TPC":
+            fe_type = "tde"
+            fakedata_frag_type = "TDE_AMC"
+            queue_frag_type = "TDEFrame"
+            fakedata_time_tick=4472*32
+            fakedata_frame_size=8972
+            
+        else:
+            raise ValueError(f"No match for {det_str}, {stream_entry.kind}")
+
+        return fe_type, queue_frag_type, fakedata_frag_type, fakedata_time_tick, fakedata_frame_size
+
     ###
     # Fake Card Reader creator
     ###
@@ -266,7 +221,7 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
       
         queues = []
         for s in RU_DESCRIPTOR.streams:
-            FRONTEND_TYPE, QUEUE_FRAGMENT_TYPE, _, _, _ = compute_data_types(s)
+            FRONTEND_TYPE, QUEUE_FRAGMENT_TYPE, _, _, _ = self.compute_data_types(s)
             queues.append(
                 Queue(
                     f"fake_source.output_{s.src_id}",
@@ -279,7 +234,6 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
         return modules, queues
 
 
-
     ###
     # FELIX Card Reader creator
     ###
@@ -287,7 +241,7 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
             self,
             # FRONTEND_TYPE: str,
             # QUEUE_FRAGMENT_TYPE: str,
-            CARD_ID_OVERRIDE: int,
+            # CARD_ID_OVERRIDE: int,
             NUMA_ID: int,
             RU_DESCRIPTOR # ReadoutUnitDescriptor
         ) -> tuple[list, list]:
@@ -311,7 +265,14 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
         links_slr0.sort()
         links_slr1.sort()
 
-        card_id = RU_DESCRIPTOR.iface if CARD_ID_OVERRIDE == -1 else CARD_ID_OVERRIDE
+        try:
+            ex = self.numa_excpt[(RU_DESCRIPTOR.host_name, RU_DESCRIPTOR.iface)]
+            CARD_OVERRIDE = ex['felix_card_id']
+        except KeyError:
+            CARD_OVERRIDE = -1
+
+
+        card_id = RU_DESCRIPTOR.iface if CARD_OVERRIDE == -1 else CARD_OVERRIDE
 
         modules = []
         queues = []
@@ -346,7 +307,7 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
     
         # Queues for card reader 1
         for s in strms_slr0:
-            FRONTEND_TYPE, QUEUE_FRAGMENT_TYPE, _, _, _ = compute_data_types(s)
+            FRONTEND_TYPE, QUEUE_FRAGMENT_TYPE, _, _, _ = self.compute_data_types(s)
             queues.append(
                 Queue(
                     f'flxcard_0.output_{s.src_id}',
@@ -358,7 +319,7 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
             )
         # Queues for card reader 2
         for s in strms_slr1:
-            FRONTEND_TYPE, QUEUE_FRAGMENT_TYPE, _, _, _ = compute_data_types(s)
+            FRONTEND_TYPE, QUEUE_FRAGMENT_TYPE, _, _, _ = self.compute_data_types(s)
             queues.append(
                 Queue(
                     f'flxcard_1.output_{s.src_id}',
@@ -404,7 +365,7 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
         
         queues = []
         for stream in RU_DESCRIPTOR.streams:
-            FRONTEND_TYPE, QUEUE_FRAGMENT_TYPE, _, _, _ = compute_data_types(stream)
+            FRONTEND_TYPE, QUEUE_FRAGMENT_TYPE, _, _, _ = self.compute_data_types(stream)
             queues.append(
                 Queue(
                     f"{nic_reader_name}.output_{stream.src_id}",
@@ -437,8 +398,8 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
                 flx_mods, flx_queues = self.create_felix_cardreader(
                     # FRONTEND_TYPE=FRONTEND_TYPE,
                     # QUEUE_FRAGMENT_TYPE=QUEUE_FRAGMENT_TYPE,
-                    CARD_ID_OVERRIDE=card_override,
-                    NUMA_ID=numa_id,
+                    # CARD_ID_OVERRIDE=self.card_override,
+                    NUMA_ID=self.numa_id,
                     RU_DESCRIPTOR=RU_DESCRIPTOR
                 )
                 cr_mods += flx_mods
@@ -454,3 +415,5 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
                 cr_queues += dpdk_queues
 
         return cr_mods, cr_queues
+
+    
