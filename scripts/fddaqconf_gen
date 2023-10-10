@@ -492,7 +492,6 @@ def cli(
             the_system.apps[ru_name] = roapp_gen.generate(
                 RU_DESCRIPTOR=ru_desc, 
                 SOURCEID_BROKER=sourceid_broker,
-                GEN_TIMESYNC=(hsi.use_fake_hsi or hsi.use_timing_hsi or trigger.use_custom_maker or trigger.use_random_maker),
                 data_file_map=data_file_map,
                 data_timeout_requests=readout_data_request_timeout
                 )
@@ -501,7 +500,6 @@ def cli(
             the_system.apps[ru_name] = roapp_gen.create_fake_readout_app(
                 RU_DESCRIPTOR = ru_desc,
                 CLOCK_SPEED_HZ = detector.clock_speed_hz,
-                GEN_TIMESYNC=(hsi.use_fake_hsi or hsi.use_timing_hsi or trigger.use_custom_maker or trigger.use_random_maker),
             )
 
 
