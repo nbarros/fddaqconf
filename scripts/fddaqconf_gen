@@ -657,16 +657,11 @@ def cli(
     # console.log("After connecting fragment producers, trigger mgraph:", the_system.apps['trigger'].modulegraph)
     # console.log("After connecting fragment producers, the_system.app_connections:", the_system.app_connections)
 
-    set_mlt_links(the_system, "trigger", verbose=debug)
+    set_mlt_links(the_system, tp_infos, "trigger", verbose=debug)
 
-    mlt_links=the_system.apps["trigger"].modulegraph.get_module("mlt").conf.links
+    mlt_mandatory_links=the_system.apps["trigger"].modulegraph.get_module("mlt").conf.mandatory_links
     if debug:
-        console.log(f"After set_mlt_links, mlt_links is {mlt_links}")
-
-
-    mlt_links=the_system.apps["trigger"].modulegraph.get_module("mlt").conf.links
-    if debug:
-        console.log(f"After remove_mlt_links, mlt_links is {mlt_links}")
+        console.log(f"After set_mlt_links, mlt_mandatory_links is {mlt_mandatory_links}")
     # END HACK
 
     if debug:
