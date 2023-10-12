@@ -460,6 +460,7 @@ def cli(
         daq_common=daq_common,
         tp_infos=tp_infos,
         trigger_data_request_timeout=trigger_data_request_timeout,
+        use_hsi_input=(hsi.use_fake_hsi or hsi.use_timing_hsi),
         DEBUG=debug)
 
     #--------------------------------------------------------------------------
@@ -490,7 +491,7 @@ def cli(
         if readout.use_fake_data_producers == False:
             the_system.apps[ru_name] = roapp_gen.generate(
                 RU_DESCRIPTOR=ru_desc, 
-                SOURCEID_BROKER=sourceid_broker, 
+                SOURCEID_BROKER=sourceid_broker,
                 data_file_map=data_file_map,
                 data_timeout_requests=readout_data_request_timeout
                 )
