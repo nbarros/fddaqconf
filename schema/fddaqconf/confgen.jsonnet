@@ -34,9 +34,6 @@ local triggergen = moo.oschema.hier(strigger).dunedaq.daqconf.triggergen;
 local sdataflow = import "daqconf/dataflowgen.jsonnet";
 local dataflowgen = moo.oschema.hier(sdataflow).dunedaq.daqconf.dataflowgen;
 
-local sdqm = import "daqconf/dqmgen.jsonnet";
-local dqmgen = moo.oschema.hier(sdqm).dunedaq.daqconf.dqmgen;
-
 local s = moo.oschema.schema("dunedaq.fddaqconf.confgen");
 local nc = moo.oschema.numeric_constraints;
 // A temporary schema construction context.
@@ -57,8 +54,6 @@ local cs = {
   // strings:         s.sequence( "Strings",  self.string, doc="List of strings"),
 
   // tpg_channel_map: s.enum(     "TPGChannelMap", ["VDColdboxChannelMap", "ProtoDUNESP1ChannelMap", "PD2HDChannelMap", "HDColdboxChannelMap"]),
-  // dqm_channel_map: s.enum(     "DQMChannelMap", ['HD', 'VD', 'PD2HD', 'HDCB']),
-  // dqm_params:      s.sequence( "DQMParams",     self.count, doc="Parameters for DQM (fixme)"),
   // tc_types:        s.sequence( "TCTypes",       self.count, doc="List of TC types"),
   // tc_type:         s.number(   "TCType",        "i4", nc(minimum=0, maximum=9), doc="Number representing TC type. Currently ranging from 0 to 9"),
   // tc_interval:     s.number(   "TCInterval",    "i8", nc(minimum=1, maximum=30000000000), doc="The intervals between TCs that are inserted into MLT by CTCM, in clock ticks"),
@@ -88,16 +83,14 @@ local cs = {
     s.field('daq_common',  daqcommongen.daq_common, default=daqcommongen.daq_common,   doc='DAQ common parameters'),
     s.field('boot',        bootgen.boot,    default=bootgen.boot,      doc='Boot parameters'),
     s.field('dataflow',    dataflowgen.dataflow,   default=dataflowgen.dataflow,     doc='Dataflow paramaters'),
-    s.field('dqm',         dqmgen.dqm,        default=dqmgen.dqm,          doc='DQM parameters'),
     s.field('hsi',         hsigen.hsi,        default=hsigen.hsi,          doc='HSI parameters'),
     s.field('ctb_hsi',     self.ctb_hsi,    default=self.ctb_hsi,      doc='CTB parameters'),
     s.field('readout',     readoutgen.readout,    default=readoutgen.readout,      doc='Readout parameters'),
     s.field('timing',      timinggen.timing,     default=timinggen.timing,       doc='Timing parameters'),
     s.field('trigger',     triggergen.trigger,    default=triggergen.trigger,      doc='Trigger parameters')
-    // s.field('dpdk_sender', self.dpdk_sender, default=self.dpdk_sender, doc='DPDK sender parameters'),
   ]),
 
 };
 
 // Output a topologically sorted array.
-stypes + sboot + sdetector + sdaqcommon + stiming + shsi + sreadout + strigger + sdataflow + sdqm + sctb + moo.oschema.sort_select(cs)
+stypes + sboot + sdetector + sdaqcommon + stiming + shsi + sreadout + strigger + sdataflow + sctb + moo.oschema.sort_select(cs)
