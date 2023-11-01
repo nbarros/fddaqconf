@@ -428,7 +428,7 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
     
 
 
-    def add_other_paths(self, readout_app, RU_DESCRIPTOR):
+    def add_volumes_resources(self, readout_app, RU_DESCRIPTOR):
 
 
         if RU_DESCRIPTOR.kind == 'flx':
