@@ -234,6 +234,16 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
         return modules, queues
 
 
+    def get_flx_card_id(self, RU_DESCRIPTOR):
+        try:
+            ex = self.numa_excpt[(RU_DESCRIPTOR.host_name, RU_DESCRIPTOR.iface)]
+            return ex['felix_card_id']
+        except KeyError:
+            return RU_DESCRIPTOR.iface
+
+
+        # return RU_DESCRIPTOR.iface if CARD_OVERRIDE == -1 else CARD_OVERRIDE
+
     ###
     # FELIX Card Reader creator
     ###
@@ -265,14 +275,14 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
         links_slr0.sort()
         links_slr1.sort()
 
-        try:
-            ex = self.numa_excpt[(RU_DESCRIPTOR.host_name, RU_DESCRIPTOR.iface)]
-            CARD_OVERRIDE = ex['felix_card_id']
-        except KeyError:
-            CARD_OVERRIDE = -1
-
-
-        card_id = RU_DESCRIPTOR.iface if CARD_OVERRIDE == -1 else CARD_OVERRIDE
+        # try:
+        #     ex = self.numa_excpt[(RU_DESCRIPTOR.host_name, RU_DESCRIPTOR.iface)]
+        #     CARD_OVERRIDE = ex['felix_card_id']
+        # except KeyError:
+        #     CARD_OVERRIDE = -1
+        # 
+        # card_id = RU_DESCRIPTOR.iface if CARD_OVERRIDE == -1 else CARD_OVERRIDE
+        card_id = self.get_flx_card_id(RU_DESCRIPTOR)
 
         modules = []
         queues = []
@@ -415,5 +425,63 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
                 cr_queues += dpdk_queues
 
         return cr_mods, cr_queues
+    
+
+
+    def add_volumes_resources(self, readout_app, RU_DESCRIPTOR):
+
+
+        if RU_DESCRIPTOR.kind == 'flx':
+
+            # c = card_override if card_override != -1 else RU_DESCRIPTOR.iface
+            card_id = self.get_flx_card_id(RU_DESCRIPTOR)
+
+            readout_app.resources = {
+                f"felix.cern/flx{card_id}-data": "1", # requesting FLX{c}
+                # "memory": f"{}Gi" # yes bro
+            }
+
+            readout_app.pod_privileged = True
+
+            readout_app.mounted_dirs += [
+                {
+                    'name': 'devfs',
+                    'physical_location': '/dev',
+                    'in_pod_location':   '/dev',
+                    'read_only': False,
+                }
+            ]
+
+        # DPDK
+        elif RU_DESCRIPTOR.kind == 'eth':
+
+            readout_app.resources = {
+                "intel.com/intel_sriov_dpdk": "1", # requesting sriov
+                "hugepages-2Mi": "8Gi", # required  to allow hp allocation in k8s
+                "memory": "96Gi" # required by k8s when hugepages are requested
+            }
+
+            readout_app.mounted_dirs += [
+                {
+                    'name': 'devfs',
+                    'physical_location': '/dev',
+                    'in_pod_location':   '/dev',
+                    'read_only': False,
+                },
+                {
+                    'name': 'linux-firmware',
+                    'physical_location': '/lib/firmware',
+                    'in_pod_location':   '/lib/firmware',
+                    'read_only': True,
+                }
+            ]
+
+            # Remove in favour of capabilites
+            readout_app.pod_privileged = True
+            readout_app.pod_capabilities += [
+                "IPC_LOCK",
+                "CAP_NET_ADMIN"
+            ]
+        
 
     
