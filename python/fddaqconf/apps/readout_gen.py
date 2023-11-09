@@ -235,14 +235,16 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
 
 
     def get_flx_card_id(self, RU_DESCRIPTOR):
+
+        card_id = RU_DESCRIPTOR.iface
         try:
-            ex = self.numa_excpt[(RU_DESCRIPTOR.host_name, RU_DESCRIPTOR.iface)]
-            return ex['felix_card_id']
+            card_id_exc = self.numa_excpt[(RU_DESCRIPTOR.host_name, RU_DESCRIPTOR.iface)]["felix_card_id"]
+            if card_id_exc != -1:
+                card_id = card_id_exc
         except KeyError:
-            return RU_DESCRIPTOR.iface
+            pass
 
-
-        # return RU_DESCRIPTOR.iface if CARD_OVERRIDE == -1 else CARD_OVERRIDE
+        return card_id
 
     ###
     # FELIX Card Reader creator
