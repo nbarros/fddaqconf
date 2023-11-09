@@ -442,7 +442,7 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
                 f"felix.cern/flx{card_id}-data": "1", # requesting FLX{c}
                 # "memory": f"{}Gi" # yes bro
             }
-            print(f"FLX GEN: {card_id} {self.numa_excpt} {RU_DESCRIPTOR.host_name} {RU_DESCRIPTOR.iface}")
+
             readout_app.pod_privileged = True
 
             readout_app.mounted_dirs += [
