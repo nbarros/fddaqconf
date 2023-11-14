@@ -168,6 +168,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option('-m', '--detector-readout-map-file', default=None, help="File containing detector detector-readout map for configuration to run")
 @click.option('-s', '--data-rate-slowdown-factor', default=0, help="Scale factor for readout internal clock to generate less data")
 @click.option('--file-label', default=None, help="File - used for raw data filename prefix")
+@click.option('--tp-file-label', default="tpstream", help="File - used for TP Stream data filename prefix")
 @click.option('-a', '--check-args-and-exit', default=False, is_flag=True, help="Check input arguments and quit")
 @click.option('-n', '--dry-run', default=False, is_flag=True, help="Dry run, do not generate output files")
 @click.option('-f', '--force', default=False, is_flag=True, help="Force configuration generation - delete existing target directory if exists")
@@ -180,6 +181,7 @@ def cli(
         detector_readout_map_file,
         data_rate_slowdown_factor,
         file_label,
+        tp_file_label,
         check_args_and_exit,
         dry_run,
         force,
@@ -514,7 +516,7 @@ def cli(
             detector=detector,
             daq_common=daq_common,
             app_name=tpw_name,
-            file_label=file_label,
+            file_label=tp_file_label,
             source_id=dfidx,
             SRC_GEO_ID_MAP=dro_map.get_src_geo_map(),
             DEBUG=debug
