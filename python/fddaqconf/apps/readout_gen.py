@@ -113,7 +113,7 @@ class NICReceiverBuilder:
                 nrc.Interface(
                     ip_addr=rx_ip,
                     mac_addr=rx_mac,
-                    pcie_dev_id=rx_pcie_dev,
+                    pci_addr=rx_pcie_dev,
                     expected_sources=srcs,
                     stats_reporting_cfg=nrc.StatsReporting()
                 )
