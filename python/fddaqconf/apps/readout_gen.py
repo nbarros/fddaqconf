@@ -59,7 +59,7 @@ class NICReceiverBuilder:
             dict: A map of streams with the same destination ip, mac and host
         """
 
-        iface_map = group_by_key(self.desc.streams, lambda s: (s.parameters.rx_ip, s.parameters.rx_mac, s.parameters.rx_host))
+        iface_map = group_by_key(self.desc.streams, lambda s: (s.parameters.rx_ip, s.parameters.rx_mac, s.parameters.rx_pcie_dev, s.parameters.rx_host))
 
         return iface_map
 
@@ -78,7 +78,7 @@ class NICReceiverBuilder:
         streams_by_if_and_tx = self.streams_by_rxiface_and_tx_endpoint()
 
         ifcfgs = []
-        for (rx_ip, rx_mac, _),txs in streams_by_if_and_tx.items():
+        for (rx_ip, rx_mac, rx_pcie_dev,_),txs in streams_by_if_and_tx.items():
             srcs = []
             # Sid is used for the "Source.id". What is it?
 
@@ -113,6 +113,7 @@ class NICReceiverBuilder:
                 nrc.Interface(
                     ip_addr=rx_ip,
                     mac_addr=rx_mac,
+                    pci_addr=rx_pcie_dev,
                     expected_sources=srcs,
                     stats_reporting_cfg=nrc.StatsReporting()
                 )
