@@ -174,7 +174,13 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
             queue_frag_type = "TDEFrame"
             fakedata_time_tick=4472*32
             fakedata_frame_size=8972
-            
+        elif det_str == "HD_CRT":
+            fe_type = "eth"
+            fakedata_frag_type = "CRT"
+            queue_frag_type = "CRTFrame"
+            fakedata_time_tick = None
+            fakedata_frame_size = 288
+    
         else:
             raise ValueError(f"No match for {det_str}, {stream_entry.kind}")
 
