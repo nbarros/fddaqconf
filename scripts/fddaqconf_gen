@@ -28,7 +28,7 @@ import daqconf.detreadoutmap as dromap
 
 
 def expand_conf(config_data, debug=False):
-    """Expands the moo configuration record into sub-records, 
+    """Expands the moo configuration record into sub-records,
     re-casting its members into the corresponding moo objects.
 
     Args:
@@ -192,7 +192,7 @@ def cli(
     # console.log("Commandline parsing completed")
     if check_args_and_exit:
         return
-    
+
     output_dir = Path(json_dir)
     if output_dir.exists():
         if dry_run:
@@ -240,7 +240,7 @@ def cli(
         boot.base_command_port = base_command_port
         console.log(f"boot.base_command_port set to {boot.base_command_port}")
 
-       
+
     if detector_readout_map_file is not None:
         readout.detector_readout_map_file = detector_readout_map_file
         console.log(f"readout.detector_readout_map_file set to {readout.detector_readout_map_file}")
@@ -259,7 +259,7 @@ def cli(
     console.log("Loading dataflow config generator")
     from daqconf.apps.dataflow_gen import get_dataflow_app
     console.log("Loading readout config generator")
-    from fddaqconf.apps.readout_gen import FDReadoutAppGenerator	
+    from fddaqconf.apps.readout_gen import FDReadoutAppGenerator
     console.log("Loading trigger config generator")
     from daqconf.apps.trigger_gen import get_trigger_app
     console.log("Loading DFO config generator")
@@ -464,7 +464,7 @@ def cli(
         #--------------------------------------------------------------------------
         if readout.use_fake_data_producers == False:
             the_system.apps[ru_name] = roapp_gen.generate(
-                RU_DESCRIPTOR=ru_desc, 
+                RU_DESCRIPTOR=ru_desc,
                 SOURCEID_BROKER=sourceid_broker,
                 data_file_map=data_file_map,
                 data_timeout_requests=readout_data_request_timeout
@@ -621,27 +621,10 @@ def cli(
         control_to_data_network=CDN,
     )
 
+    from fddaqconf.thread_pinning import add_thread_pinning_to_boot
 
-    if readout.thread_pinning_file != "":
-        resolved_thread_pinning_file = Path(os.path.expandvars(readout.thread_pinning_file)).expanduser()
-        if not resolved_thread_pinning_file.is_absolute():
-            resolved_thread_pinning_file = config_file.parent / resolved_thread_pinning_file
-
-        if not resolved_thread_pinning_file.exists():
-            raise RuntimeError(f'Cannot find the file {readout.thread_pinning_file} ({resolved_thread_pinning_file})')
-
-        system_command_datas['boot']['scripts'] = {
-            "thread_pinning": {
-                "cmd": [
-                    "readout-affinity.py --pinfile ${DUNEDAQ_THREAD_PIN_FILE}"
-                ],
-                "env": {
-                    "DUNEDAQ_THREAD_PIN_FILE": resolved_thread_pinning_file.resolve().as_posix(),
-                    "LD_LIBRARY_PATH": "getenv",
-                    "PATH": "getenv"
-                }
-            }
-        }
+    for tpf in readout.thread_pinning_files:
+        add_thread_pinning_to_boot(system_command_datas, tpf, config_file.parent)
 
 
     if not dry_run:
@@ -682,4 +665,4 @@ if __name__ == '__main__':
         console.print_exception()
         raise SystemExit(-1)
     # console.log("daqconf - finished")
-    
+
