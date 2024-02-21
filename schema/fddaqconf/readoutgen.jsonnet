@@ -31,7 +31,7 @@ local cs = {
   ], doc="Exception to the default NUMA ID for FELIX cards"),
 
   numa_exceptions: s.sequence( "NUMAExceptions", self.numa_exception, doc="Exceptions to the default NUMA ID"),
-    
+
   numa_config: s.record("numa_config", [
     s.field( "default_id", types.count, default=0, doc="Default NUMA ID for FELIX cards"),
     s.field( "default_latency_numa_aware", types.flag, default=false, doc="Default for Latency Buffer NUMA awareness"),
@@ -51,14 +51,21 @@ local cs = {
     s.field( "exceptions", self.dpdk_lcore_exceptions, default=[], doc="Exceptions to the default NUMA ID"),
   ]),
 
+
+  thread_pinning_file: s.record("ThreadPinningFile", [
+    s.field( "after", types.string, default="", doc="When to execute the thread pinning script with this file, for example specifying boot will execute the threadpinning after boot"),
+    s.field( "file", types.path, default="", doc="A thread pinning configuration file"),
+  ]),
+  thread_pinning_files: s.sequence( "ThreadPinningFiles", self.thread_pinning_file, doc="A list of thread pinning files"),
+
   readout: s.record("readout", [
     s.field( "detector_readout_map_file", types.path, default='./DetectorReadoutMap.json', doc="File containing detector hardware map for configuration to run"),
     s.field( "use_fake_data_producers", types.flag, default=false, doc="Use fake data producers that respond with empty fragments immediately instead of (fake) cards and DLHs"),
     // s.field( "memory_limit_gb", types.count, default=64, doc="Application memory limit in GB")
     // Fake cards
     s.field( "use_fake_cards", types.flag, default=false, doc="Use fake cards"),
-    s.field( "generate_periodic_adc_pattern", types.flag, default=false, doc="Generate a periodic ADC pattern inside the input data. Only when FakeCard reader is used"),     
-    s.field( "emulated_TP_rate_per_ch", types.float4, default=1.0, doc="Rate of TPs per channel when using a periodic ADC pattern generation. Values expresses as multiples of the expected rate of 100 Hz/ch"),     
+    s.field( "generate_periodic_adc_pattern", types.flag, default=false, doc="Generate a periodic ADC pattern inside the input data. Only when FakeCard reader is used"),
+    s.field( "emulated_TP_rate_per_ch", types.float4, default=1.0, doc="Rate of TPs per channel when using a periodic ADC pattern generation. Values expresses as multiples of the expected rate of 100 Hz/ch"),
     s.field( "emulated_data_times_start_with_now", types.flag, default=false, doc="If active, the timestamp of the first emulated data frame is set to the current wallclock time"),
     s.field( "default_data_file", types.path, default='asset://?label=ProtoWIB&subsystem=readout', doc="File containing data frames to be replayed by the fake cards. Former -d. Uses the asset manager, can also be 'asset://?checksum=somelonghash', or 'file://somewhere/frames.bin' or 'frames.bin'"),
     s.field( "data_files", self.data_files, default=[], doc="Files to use by detector type"),
@@ -71,7 +78,7 @@ local cs = {
     s.field( "numa_config", self.numa_config, default=self.numa_config, doc='Configuration of FELIX NUMA IDs'),
     // DLH
     s.field( "emulator_mode", types.flag, default=false, doc="If active, timestamps of data frames are overwritten when processed by the readout. This is necessary if the felix card does not set correct timestamps. Former -e"),
-    s.field( "thread_pinning_file", types.path, default="", doc="A thread pinning configuration file that gets executed after conf."),
+    s.field( "thread_pinning_files", self.thread_pinning_files, default=[], doc="A list of thread pinning configuration files that gets executed when specified."),
     s.field( "source_queue_timeout_ms", types.count, default=0, doc="The source queue timeout that will be used in the datalink handle when polling source queues"),
     s.field( "source_queue_sleep_us", types.count, default=500, doc="The source queue seep that will be used in the datalink handle when polling source queues."),
 
