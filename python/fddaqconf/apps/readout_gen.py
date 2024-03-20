@@ -466,7 +466,7 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
 
             readout_app.resources = {
                 "intel.com/intel_sriov_dpdk": "1", # requesting sriov
-                "hugepages-2Mi": "8Gi", # required  to allow hp allocation in k8s
+                "hugepages-2Mi": "4Gi", # required  to allow hp allocation in k8s
                 "memory": "96Gi" # required by k8s when hugepages are requested
             }
 
