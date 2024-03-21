@@ -624,7 +624,8 @@ def cli(
     from fddaqconf.thread_pinning import add_thread_pinning_to_boot
 
     for tpf in readout.thread_pinning_files:
-        add_thread_pinning_to_boot(system_command_datas, tpf, config_file.parent)
+        from daqconf.core.conf_utils import get_rte_script
+        add_thread_pinning_to_boot(system_command_datas, tpf, config_file.parent, get_rte_script())
 
 
     if not dry_run:
