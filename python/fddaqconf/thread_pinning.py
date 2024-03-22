@@ -1,5 +1,5 @@
 
-def add_thread_pinning_to_boot(system_data, thread_pinning_file, path):
+def add_thread_pinning_to_boot(system_data, thread_pinning_file, path, rte):
     after = thread_pinning_file['after']
     file  = thread_pinning_file['file']
     from pathlib import Path
@@ -33,11 +33,12 @@ def add_thread_pinning_to_boot(system_data, thread_pinning_file, path):
     system_data['boot']['scripts'][key] = {
         "after": after,
         "cmd": [
+            f"source {rte}",
             "readout-affinity.py --pinfile ${DUNEDAQ_THREAD_PIN_FILE}"
         ],
         "env": {
             "DUNEDAQ_THREAD_PIN_FILE": resolved_thread_pinning_file.resolve().as_posix(),
-            "LD_LIBRARY_PATH": "getenv",
-            "PATH": "getenv"
+            # "LD_LIBRARY_PATH": "getenv",
+            # "PATH": "getenv"
         }
     }
