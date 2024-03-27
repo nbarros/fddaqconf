@@ -74,8 +74,7 @@ local cs = {
     s.field( "data_files", self.data_files, default=[], doc="Files to use by detector type"),
     // DPDK
     s.field( "dpdk_eal_args", types.string, default="", doc='Args passed to the EAL in DPDK'),
-    // s.field( "dpdk_rxqueues_per_lcore", types.count, default=1, doc='Number of rx queues per core'),
-    // s.field( "dpdk_lcore_id_set", self.id_list, default=1, doc='List of IDs per core'),
+    s.field( "dpdk_iface_config", nicreader_cfg.InterfaceParameters, default=nicreader_cfg.InterfaceParameters, doc="Configuration of DPDK interface"),
     s.field( "dpdk_lcores_config", self.dpdk_lcore_config, default=self.dpdk_lcore_config, doc='Configuration of DPDK LCore IDs'),
     // FLX
     s.field( "numa_config", self.numa_config, default=self.numa_config, doc='Configuration of FELIX NUMA IDs'),

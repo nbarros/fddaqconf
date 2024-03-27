@@ -72,7 +72,7 @@ class NICReceiverBuilder:
             
         return m
 
-    def build_conf(self, eal_arg_list, lcores_id_set):
+    def build_conf(self, eal_arg_list, lcores_id_set, iface_parameters):
 
 
         streams_by_if_and_tx = self.streams_by_rxiface_and_tx_endpoint()
@@ -114,7 +114,8 @@ class NICReceiverBuilder:
                     ip_addr=rx_ip,
                     mac_addr=rx_mac,
                     pci_addr=rx_pcie_dev,
-                    expected_sources=srcs
+                    expected_sources=srcs,
+                    parameters=iface_parameters
                 )
             )         
 
@@ -371,7 +372,8 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
                     plugin="NICReceiver",
                     conf=eth_ru_bldr.build_conf(
                         eal_arg_list=cfg.dpdk_eal_args,
-                        lcores_id_set=lcores_id_set
+                        lcores_id_set=lcores_id_set,
+                        iface_parameters=cfg.dpdk_iface_config
                         ),
                 )]
         
