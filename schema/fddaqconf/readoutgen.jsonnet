@@ -6,6 +6,9 @@ local moo = import "moo.jsonnet";
 local stypes = import "daqconf/types.jsonnet";
 local types = moo.oschema.hier(stypes).dunedaq.daqconf.types;
 
+local snicreader = import "dpdklibs/nicreader.jsonnet";
+local nicreader_cfg = moo.oschema.hier(snicreader).dunedaq.dpdklibs.nicreader;
+
 local s = moo.oschema.schema("dunedaq.fddaqconf.readoutgen");
 local nc = moo.oschema.numeric_constraints;
 // A temporary schema construction context.
@@ -102,4 +105,4 @@ local cs = {
 
 };
 
-stypes + moo.oschema.sort_select(cs)
+stypes + snicreader + moo.oschema.sort_select(cs)

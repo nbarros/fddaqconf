@@ -114,8 +114,7 @@ class NICReceiverBuilder:
                     ip_addr=rx_ip,
                     mac_addr=rx_mac,
                     pci_addr=rx_pcie_dev,
-                    expected_sources=srcs,
-                    stats_reporting_cfg=nrc.StatsReporting()
+                    expected_sources=srcs
                 )
             )         
 
