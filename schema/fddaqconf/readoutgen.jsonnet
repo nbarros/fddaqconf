@@ -74,6 +74,7 @@ local cs = {
     s.field( "data_files", self.data_files, default=[], doc="Files to use by detector type"),
     // DPDK
     s.field( "dpdk_eal_args", types.string, default="", doc='Args passed to the EAL in DPDK'),
+    s.field( "dpdk_enable_callback_bypass", types.flag, default=false, doc='Enable callback bypass'),
     s.field( "dpdk_iface_config", nicreader_cfg.InterfaceParameters, default=nicreader_cfg.InterfaceParameters, doc="Configuration of DPDK interface"),
     s.field( "dpdk_lcores_config", self.dpdk_lcore_config, default=self.dpdk_lcore_config, doc='Configuration of DPDK LCore IDs'),
     // FLX

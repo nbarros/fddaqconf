@@ -385,7 +385,8 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
                     f"{nic_reader_name}.output_{stream.src_id}",
                     f"datahandler_{stream.src_id}.raw_input",
                     QUEUE_FRAGMENT_TYPE,
-                    f'{FRONTEND_TYPE}_stream_{stream.src_id}', 100000
+                    ('cb_' if cfg.dpdk_enable_callback_bypass else '')+f'{FRONTEND_TYPE}_stream_{stream.src_id}',
+                    100000
                 )
             )
 
