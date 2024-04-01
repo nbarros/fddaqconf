@@ -11,7 +11,7 @@ moo.otypes.load_types('readoutlibs/sourceemulatorconfig.jsonnet')
 moo.otypes.load_types('readoutlibs/readoutconfig.jsonnet')
 moo.otypes.load_types('dfmodules/fakedataprod.jsonnet')
 moo.otypes.load_types("dpdklibs/nicreader.jsonnet")
-moo.otypes.load_types("fdreadoutmodules/crtreader.jsonnet")
+moo.otypes.load_types("crtmodules/crtreader.jsonnet")
 
 # Import new types
 import dunedaq.readoutlibs.sourceemulatorconfig as sec
@@ -19,7 +19,7 @@ import dunedaq.flxlibs.felixcardreader as flxcr
 import dunedaq.readoutlibs.readoutconfig as rconf
 import dunedaq.dfmodules.fakedataprod as fdp
 import dunedaq.dpdklibs.nicreader as nrc
-import dunedaq.fdreadoutmodules.crtreader as crtreader
+import dunedaq.crtmodules.crtreader as crtreader
 
 # from appfwk.utils import acmd, mcmd, mrccmd, mspec
 from os import path
