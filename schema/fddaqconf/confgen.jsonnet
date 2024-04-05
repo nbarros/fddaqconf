@@ -10,6 +10,9 @@ local types = moo.oschema.hier(stypes).dunedaq.daqconf.types;
 local sctb = import "ctbmodules/ctbmodule.jsonnet";
 local ctbmodule = moo.oschema.hier(sctb).dunedaq.ctbmodules.ctbmodule;
 
+local scib = import "cibmodules/cibmodule.jsonnet";
+local cibmodule = moo.oschema.hier(scib).dunedaq.cibmodules.cibmodule;
+
 local sboot = import "daqconf/bootgen.jsonnet";
 local bootgen = moo.oschema.hier(sboot).dunedaq.daqconf.bootgen;
 
@@ -78,6 +81,18 @@ local cs = {
   ]),
 
 
+	// need to make heads and tails of this
+	// The CIB only has one trigger type
+  cib_hsi: s.record("cib_hsi", [
+    # cib module options
+    s.field( "use_cib_hsi", types.flag, default=false, doc='Flag to control whether CIB HSI config is generated. Default is false'),
+    s.field( "cib_num_modules", types.int4, default=2, doc='Number of modules to be instantiated. Default is 2'),
+    s.field( "cib_hsi_host", cibmodules.host, default='localhost', doc='Host to run the HSI app on')
+    s.field( "cib_hsi_port", types.host, default='localhost', doc='Host to run the HSI app on')
+
+  ]),
+
+
   fddaqconf_gen: s.record('fddaqconf_gen', [
     s.field('detector',    detectorgen.detector,   default=detectorgen.detector,     doc='Boot parameters'),
     s.field('daq_common',  daqcommongen.daq_common, default=daqcommongen.daq_common,   doc='DAQ common parameters'),
@@ -85,6 +100,7 @@ local cs = {
     s.field('dataflow',    dataflowgen.dataflow,   default=dataflowgen.dataflow,     doc='Dataflow paramaters'),
     s.field('hsi',         hsigen.hsi,        default=hsigen.hsi,          doc='HSI parameters'),
     s.field('ctb_hsi',     self.ctb_hsi,    default=self.ctb_hsi,      doc='CTB parameters'),
+    s.field('cib_hsi',     self.cib_hsi,    default=self.cib_hsi,      doc='CIB parameters'),
     s.field('readout',     readoutgen.readout,    default=readoutgen.readout,      doc='Readout parameters'),
     s.field('timing',      timinggen.timing,     default=timinggen.timing,       doc='Timing parameters'),
     s.field('trigger',     triggergen.trigger,    default=triggergen.trigger,      doc='Trigger parameters')
@@ -93,4 +109,4 @@ local cs = {
 };
 
 // Output a topologically sorted array.
-stypes + sboot + sdetector + sdaqcommon + stiming + shsi + sreadout + strigger + sdataflow + sctb + moo.oschema.sort_select(cs)
+stypes + sboot + sdetector + sdaqcommon + stiming + shsi + sreadout + strigger + sdataflow + sctb + scib + moo.oschema.sort_select(cs)
