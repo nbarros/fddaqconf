@@ -439,6 +439,7 @@ def cli(
         use_hsi_input=hsi.use_timing_hsi,
         use_fake_hsi_input=hsi.use_fake_hsi,
         use_ctb_input=ctb_hsi.use_ctb_hsi,
+        fake_hsi_to_ctb=hsi.fake_hsi_to_ctb,
         DEBUG=debug)
 
     #--------------------------------------------------------------------------
