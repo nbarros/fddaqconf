@@ -81,15 +81,21 @@ local cs = {
   ]),
 
 
-	// need to make heads and tails of this
-	// The CIB only has one trigger type
+  cib_hsi_inst: s.record("cib_hsi_inst",[
+  	s.field("trigger"	,types.int4, default=0, 					doc='Which CIB trigger is mapped by this instance'),
+  	s.field("host" 	 	,types.host, default='localhost',			doc='Host where this HSI app instance will run'),
+  	s.field("cib_host"	,types.host, default="np04-iols-cib-01", 	doc='CIB endpoint host'),
+  	s.field("cib_port"	,types.port, default=8992, 					doc='CIB endpoint port'),  	
+  ]),
+  
+  // the number of entries on this sequence should match the number of instances for the laser system
+  cib_seq : s.sequence("cib_hsi_instances",	self.cib_hsi_inst, doc="list of CIB HSI instances"),
+  
   cib_hsi: s.record("cib_hsi", [
     # cib module options
-    s.field( "use_cib_hsi", types.flag, default=false, doc='Flag to control whether CIB HSI config is generated. Default is false'),
-    s.field( "cib_num_modules", types.int4, default=2, doc='Number of modules to be instantiated. Default is 2'),
-    s.field( "cib_hsi_host", cibmodules.host, default='localhost', doc='Host to run the HSI app on')
-    s.field( "cib_hsi_port", types.host, default='localhost', doc='Host to run the HSI app on')
-
+    s.field( "use_cib_hsi", 	types.flag, default=false, doc='Flag to control whether CIB HSI config is generated. Default is false'),	
+    s.field( "cib_num_modules", types.int4, default=1, doc='Number of modules to be instantiated. Default is 2 (one per periscope)'),
+	s.field( "cib_instances",	self.cib_seq , default=[self.cib_hsi_inst], doc="List of configurations for each instance"),
   ]),
 
 

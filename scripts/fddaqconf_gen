@@ -312,7 +312,8 @@ def cli(
     #--------------------------------------------------------------------------
     # Generation starts here
     #--------------------------------------------------------------------------
-    console.log(f"Generating configs for hosts trigger={trigger.host_trigger} DFO={dataflow.host_dfo} dataflow={host_df} timing_hsi={hsi.host_timing_hsi} fake_hsi={hsi.host_fake_hsi} ctb_hsi={ctb_hsi.host_ctb_hsi} cib_hsi={cib_hsi.host_cib_hsi}")
+    cib_hsi_hosts = [h["host"] for h in cib_hsi.cib_instances]
+    console.log(f"Generating configs for hosts trigger={trigger.host_trigger} DFO={dataflow.host_dfo} dataflow={host_df} timing_hsi={hsi.host_timing_hsi} fake_hsi={hsi.host_fake_hsi} ctb_hsi={ctb_hsi.host_ctb_hsi} cib_hsi={cib_hsi_hosts}")
 
     the_system = System()
 
@@ -399,13 +400,19 @@ def cli(
         cib_source_id = sourceid_broker.get_next_source_id("HW_Signals_Interface")
         sourceid_broker.register_source_id("HW_Signals_Interface", cib_source_id, None)
 
-        the_system.apps["cibhsi"] = get_cibmodules_app(
-            cib_hsi,
-            num_cibmodules = 2,
-            nickname = "cib",
-            source_id=cib_source_id,
-            )
-        if debug: console.log("cib hsi cmd data:", the_system.apps["cibhsi"])
+        for i in range(cib_hsi.cib_num_modules):
+          import dunedaq.fddaqconf.confgen as confgen
+          
+          cib_i_conf = confgen.cib_hsi_inst(cib_hsi.cib_instances[i])
+          
+          name = f"cibhsi{i}"
+          the_system.apps[name] = get_cib_hsi_app(
+                    "cib",
+                    i,
+                    cib_source_id,
+                    cib_i_conf,                    # this is the high level configuration as taken from fddaq/confgen.jsonnet
+                    )
+          if debug: console.log("cib hsi cmd data:", the_system.apps[name])
 
 
     #--------------------------------------------------------------------------
