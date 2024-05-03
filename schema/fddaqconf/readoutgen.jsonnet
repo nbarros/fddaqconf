@@ -6,6 +6,9 @@ local moo = import "moo.jsonnet";
 local stypes = import "daqconf/types.jsonnet";
 local types = moo.oschema.hier(stypes).dunedaq.daqconf.types;
 
+local snicreader = import "dpdklibs/nicreader.jsonnet";
+local nicreader_cfg = moo.oschema.hier(snicreader).dunedaq.dpdklibs.nicreader;
+
 local s = moo.oschema.schema("dunedaq.fddaqconf.readoutgen");
 local nc = moo.oschema.numeric_constraints;
 // A temporary schema construction context.
@@ -71,8 +74,8 @@ local cs = {
     s.field( "data_files", self.data_files, default=[], doc="Files to use by detector type"),
     // DPDK
     s.field( "dpdk_eal_args", types.string, default="", doc='Args passed to the EAL in DPDK'),
-    // s.field( "dpdk_rxqueues_per_lcore", types.count, default=1, doc='Number of rx queues per core'),
-    // s.field( "dpdk_lcore_id_set", self.id_list, default=1, doc='List of IDs per core'),
+    s.field( "dpdk_enable_callback_bypass", types.flag, default=false, doc='Enable callback bypass'),
+    s.field( "dpdk_iface_config", nicreader_cfg.InterfaceParameters, default=nicreader_cfg.InterfaceParameters, doc="Configuration of DPDK interface"),
     s.field( "dpdk_lcores_config", self.dpdk_lcore_config, default=self.dpdk_lcore_config, doc='Configuration of DPDK LCore IDs'),
     // FLX
     s.field( "numa_config", self.numa_config, default=self.numa_config, doc='Configuration of FELIX NUMA IDs'),
@@ -87,9 +90,14 @@ local cs = {
     s.field( "fragment_send_timeout_ms", types.count, default=10, doc="The send timeout that will be used in the readout modules when sending fragments downstream (i.e. to the TRB)."),
     s.field( "enable_tpg", types.flag, default=false, doc="Enable TPG"),
     s.field( "tpg_threshold", types.count, default=120, doc="Select TPG threshold"),
+    s.field( "tpg_rs_memory_factor", types.float4, default=0.8, doc="Memory factor (R) for the TPG running sum algorithms"),
+    s.field( "tpg_rs_scale_factor", types.count, default=2, doc="Scale factor for the TPG running sum algorithms"),
+    s.field( "tpg_frugal_streaming_accumulator_limit", types.count, default=10, doc="Accumulator limit for the frugal streaming method"),
     s.field( "tpg_algorithm", types.string, default="SimpleThreshold", doc="Select TPG algorithm (SimpleThreshold, AbsRS)"),
+    s.field( "enable_simple_threshold_on_collection", types.flag, default=false, doc="Enable SimpleThreshold TPG algorithm only on collection planes when a Running Sum algorithm is enabled"),        
     s.field( "tpg_channel_mask", self.id_list, default=[], doc="List of offline channels to be masked out from the TPHandler"),
     s.field( "tpset_min_latency_ticks", types.uint8, 3125000, doc="Latency introduced to allow for TPs to arrive and be reordered, default is 50 ms"),
+    s.field( "tardy_tp_quiet_time_at_start_sec", types.int4, 10, doc="Amount of time that warning messages about tardy TPs will be suppressed at the start of a run, default is 10s"),
     s.field( "enable_raw_recording", types.flag, default=false, doc="Add queues and modules necessary for the record command"),
     s.field( "raw_recording_output_dir", types.path, default='.', doc="Output directory where recorded data is written to. Data for each link is written to a separate file"),
     s.field( "send_partial_fragments", types.flag, default=false, doc="Whether to send a partial fragment if one is available")
@@ -97,4 +105,4 @@ local cs = {
 
 };
 
-stypes + moo.oschema.sort_select(cs)
+stypes + snicreader + moo.oschema.sort_select(cs)
