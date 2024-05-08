@@ -10,6 +10,9 @@ local types = moo.oschema.hier(stypes).dunedaq.daqconf.types;
 local sctb = import "ctbmodules/ctbmodule.jsonnet";
 local ctbmodule = moo.oschema.hier(sctb).dunedaq.ctbmodules.ctbmodule;
 
+local scib = import "cibmodules/cibmodule.jsonnet";
+local cibmodule = moo.oschema.hier(scib).dunedaq.cibmodules.cibmodule;
+
 local sboot = import "daqconf/bootgen.jsonnet";
 local bootgen = moo.oschema.hier(sboot).dunedaq.daqconf.bootgen;
 
@@ -78,6 +81,24 @@ local cs = {
   ]),
 
 
+  cib_hsi_inst: s.record("cib_hsi_inst",[
+  	s.field("trigger"	,types.int4, default=0, 					doc='Which CIB trigger is mapped by this instance'),
+  	s.field("host" 	 	,types.host, default='localhost',			doc='Host where this HSI app instance will run'),
+  	s.field("cib_host"	,types.host, default="np04-iols-cib-01", 	doc='CIB endpoint host'),
+  	s.field("cib_port"	,types.port, default=8992, 					doc='CIB endpoint port'),  	
+  ]),
+  
+  // the number of entries on this sequence should match the number of instances for the laser system
+  cib_seq : s.sequence("cib_hsi_instances",	self.cib_hsi_inst, doc="list of CIB HSI instances"),
+  
+  cib_hsi: s.record("cib_hsi", [
+    # cib module options
+    s.field( "use_cib_hsi", 	types.flag, default=false, doc='Flag to control whether CIB HSI config is generated. Default is false'),	
+    s.field( "cib_num_modules", types.int4, default=1, doc='Number of modules to be instantiated. Default is 2 (one per periscope)'),
+	s.field( "cib_instances",	self.cib_seq , default=[self.cib_hsi_inst], doc="List of configurations for each instance"),
+  ]),
+
+
   fddaqconf_gen: s.record('fddaqconf_gen', [
     s.field('detector',    detectorgen.detector,   default=detectorgen.detector,     doc='Boot parameters'),
     s.field('daq_common',  daqcommongen.daq_common, default=daqcommongen.daq_common,   doc='DAQ common parameters'),
@@ -85,6 +106,7 @@ local cs = {
     s.field('dataflow',    dataflowgen.dataflow,   default=dataflowgen.dataflow,     doc='Dataflow paramaters'),
     s.field('hsi',         hsigen.hsi,        default=hsigen.hsi,          doc='HSI parameters'),
     s.field('ctb_hsi',     self.ctb_hsi,    default=self.ctb_hsi,      doc='CTB parameters'),
+    s.field('cib_hsi',     self.cib_hsi,    default=self.cib_hsi,      doc='CIB parameters'),
     s.field('readout',     readoutgen.readout,    default=readoutgen.readout,      doc='Readout parameters'),
     s.field('timing',      timinggen.timing,     default=timinggen.timing,       doc='Timing parameters'),
     s.field('trigger',     triggergen.trigger,    default=triggergen.trigger,      doc='Trigger parameters')
@@ -93,4 +115,4 @@ local cs = {
 };
 
 // Output a topologically sorted array.
-stypes + sboot + sdetector + sdaqcommon + stiming + shsi + sreadout + strigger + sdataflow + sctb + moo.oschema.sort_select(cs)
+stypes + sboot + sdetector + sdaqcommon + stiming + shsi + sreadout + strigger + sdataflow + sctb + scib + moo.oschema.sort_select(cs)
