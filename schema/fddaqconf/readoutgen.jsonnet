@@ -54,12 +54,25 @@ local cs = {
     s.field( "exceptions", self.dpdk_lcore_exceptions, default=[], doc="Exceptions to the default NUMA ID"),
   ]),
 
-
   thread_pinning_file: s.record("ThreadPinningFile", [
     s.field( "after", types.string, default="", doc="When to execute the thread pinning script with this file, for example specifying boot will execute the threadpinning after boot"),
     s.field( "file", types.path, default="", doc="A thread pinning configuration file"),
   ]),
   thread_pinning_files: s.sequence( "ThreadPinningFiles", self.thread_pinning_file, doc="A list of thread pinning files"),
+
+
+  raw_recording_exception:  s.record( "RawRecordingException", [
+    s.field( "host", types.host, default='localhost', doc="Host of exception"),
+    s.field( "numa_id", types.count, default=0, doc="NUMA ID of exception"),
+    s.field( "raw_recording_output_dir", types.path, default='.', doc="Output directory where recorded data is written to. Data for each link is written to a separate file")
+  ], doc="Exception to the default raw recording output directory"),
+
+  raw_recording_exceptions: s.sequence( "RawRecordingExceptions", self.raw_recording_exception, doc="Exceptions to the default raw recording output directory"),
+  
+  raw_recording_config: s.record("RawRecordingConfig", [
+    s.field( "default_output_dir", types.path, default='.', doc="Output directory where recorded data is written to. Data for each link is written to a separate file"),
+    s.field( "exceptions", self.raw_recording_exceptions, default=[], doc="Exceptions to the default raw recording output directory")
+  ]),
 
   readout: s.record("readout", [
     s.field( "detector_readout_map_file", types.path, default='./DetectorReadoutMap.json', doc="File containing detector hardware map for configuration to run"),
@@ -108,6 +121,7 @@ local cs = {
     s.field( "tardy_tp_quiet_time_at_start_sec", types.int4, 10, doc="Amount of time that warning messages about tardy TPs will be suppressed at the start of a run, default is 10s"),
     s.field( "enable_raw_recording", types.flag, default=false, doc="Add queues and modules necessary for the record command"),
     s.field( "raw_recording_output_dir", types.path, default='.', doc="Output directory where recorded data is written to. Data for each link is written to a separate file"),
+    s.field( "raw_recording_config", self.raw_recording_config, default=self.raw_recording_config, doc="Configuration of raw recording"),
     s.field( "send_partial_fragments", types.flag, default=false, doc="Whether to send a partial fragment if one is available")
   ]),
 
