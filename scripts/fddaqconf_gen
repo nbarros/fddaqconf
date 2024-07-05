@@ -463,6 +463,7 @@ def cli(
     the_system.apps['trigger'] = get_trigger_app(
         trigger=trigger,
         detector=detector,
+        src_geo_id_map=dro_map.get_src_geo_map(),
         daq_common=daq_common,
         tp_infos=tp_infos,
         trigger_data_request_timeout=trigger_data_request_timeout,
