@@ -11,7 +11,7 @@ moo.otypes.load_types('readoutlibs/sourceemulatorconfig.jsonnet')
 moo.otypes.load_types('readoutlibs/readoutconfig.jsonnet')
 moo.otypes.load_types('dfmodules/fakedataprod.jsonnet')
 moo.otypes.load_types("dpdklibs/nicreader.jsonnet")
-
+moo.otypes.load_types("crtmodules/crtreader.jsonnet")
 
 # Import new types
 import dunedaq.readoutlibs.sourceemulatorconfig as sec
@@ -19,6 +19,7 @@ import dunedaq.flxlibs.felixcardreader as flxcr
 import dunedaq.readoutlibs.readoutconfig as rconf
 import dunedaq.dfmodules.fakedataprod as fdp
 import dunedaq.dpdklibs.nicreader as nrc
+import dunedaq.crtmodules.crtreader as crtreader
 
 # from appfwk.utils import acmd, mcmd, mrccmd, mspec
 from os import path
@@ -174,7 +175,13 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
             queue_frag_type = "TDEFrame"
             fakedata_time_tick=4472*32
             fakedata_frame_size=8972
-            
+        elif det_str == "HD_CRT":
+            fe_type = "crt"
+            fakedata_frag_type = "CRT"
+            queue_frag_type = "CRTFrame"
+            fakedata_time_tick = None
+            fakedata_frame_size = 288
+    
         else:
             raise ValueError(f"No match for {det_str}, {stream_entry.kind}")
 
@@ -391,7 +398,32 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
             )
 
         return modules, queues
-    
+
+    def create_crt_cardreader(self,
+                              RU_DESCRIPTOR
+                              )-> tuple[list, list]:
+
+        modules = []
+        queues = []
+        for stream in RU_DESCRIPTOR.streams:
+            crtcard_name = f'crtcard_{stream.parameters.usb}'
+
+            modules.append(DAQModule(name=crtcard_name,
+                                     plugin="CRTReader",
+                                     conf=crtreader.Conf(data_directory=stream.parameters.data_directory,
+                                                         usb=stream.parameters.usb)))
+
+            FRONTEND_TYPE, QUEUE_FRAGMENT_TYPE, _, _, _ = self.compute_data_types(stream)
+            queues.append(
+                Queue(
+                    f"{crtcard_name}.output_{stream.src_id}",
+                    f"datahandler_{stream.src_id}.raw_input",
+                    QUEUE_FRAGMENT_TYPE,
+                    f'{FRONTEND_TYPE}_stream_{stream.src_id}', 100000
+                )
+            )
+        return modules, queues
+
     def create_cardreader(self, RU_DESCRIPTOR, data_file_map):
         # Create the card readers
         cr_mods = []
@@ -428,6 +460,11 @@ class FDReadoutAppGenerator(ReadoutAppGenerator):
                 )
                 cr_mods += dpdk_mods
                 cr_queues += dpdk_queues
+
+            elif RU_DESCRIPTOR.kind == 'crt':
+                crt_mods, crt_queues = self.create_crt_cardreader(RU_DESCRIPTOR=RU_DESCRIPTOR)
+                cr_mods += crt_mods
+                cr_queues += crt_queues
 
         return cr_mods, cr_queues
     
