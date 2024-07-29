@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(fddaqconf VERSION 1.2.4)
+project(fddaqconf VERSION 1.2.5)
 
 find_package(daq-cmake REQUIRED )
 
