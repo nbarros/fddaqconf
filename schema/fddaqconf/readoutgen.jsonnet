@@ -54,12 +54,25 @@ local cs = {
     s.field( "exceptions", self.dpdk_lcore_exceptions, default=[], doc="Exceptions to the default NUMA ID"),
   ]),
 
-
   thread_pinning_file: s.record("ThreadPinningFile", [
     s.field( "after", types.string, default="", doc="When to execute the thread pinning script with this file, for example specifying boot will execute the threadpinning after boot"),
     s.field( "file", types.path, default="", doc="A thread pinning configuration file"),
   ]),
   thread_pinning_files: s.sequence( "ThreadPinningFiles", self.thread_pinning_file, doc="A list of thread pinning files"),
+
+
+  raw_recording_exception:  s.record( "RawRecordingException", [
+    s.field( "host", types.host, default='localhost', doc="Host of exception"),
+    s.field( "numa_id", types.count, default=0, doc="NUMA ID of exception"),
+    s.field( "raw_recording_output_dir", types.path, default='.', doc="Output directory where recorded data is written to. Data for each link is written to a separate file")
+  ], doc="Exception to the default raw recording output directory"),
+
+  raw_recording_exceptions: s.sequence( "RawRecordingExceptions", self.raw_recording_exception, doc="Exceptions to the default raw recording output directory"),
+  
+  raw_recording_config: s.record("RawRecordingConfig", [
+    s.field( "default_output_dir", types.path, default='.', doc="Output directory where recorded data is written to. Data for each link is written to a separate file"),
+    s.field( "exceptions", self.raw_recording_exceptions, default=[], doc="Exceptions to the default raw recording output directory")
+  ]),
 
   readout: s.record("readout", [
     s.field( "detector_readout_map_file", types.path, default='./DetectorReadoutMap.json', doc="File containing detector hardware map for configuration to run"),
@@ -89,17 +102,26 @@ local cs = {
     s.field( "latency_buffer_size", types.count, default=499968, doc="Size of the latency buffers (in number of elements)"),
     s.field( "fragment_send_timeout_ms", types.count, default=10, doc="The send timeout that will be used in the readout modules when sending fragments downstream (i.e. to the TRB)."),
     s.field( "enable_tpg", types.flag, default=false, doc="Enable TPG"),
-    s.field( "tpg_threshold", types.count, default=120, doc="Select TPG threshold"),
-    s.field( "tpg_rs_memory_factor", types.float4, default=0.8, doc="Memory factor (R) for the TPG running sum algorithms"),
-    s.field( "tpg_rs_scale_factor", types.count, default=2, doc="Scale factor for the TPG running sum algorithms"),
+    s.field( "tpg_threshold_default", types.count, default=120, doc="Select the default TPG threshold."),
+    s.field( "tpg_threshold_plane0", types.count, default=0, doc="Select TPG threshold for plane 0. Defaults to tpg_threshold_default value if empty."),
+    s.field( "tpg_threshold_plane1", types.count, default=0, doc="Select TPG threshold for plane 1. Defaults to tpg_threshold_default value if empty."),
+    s.field( "tpg_threshold_plane2", types.count, default=0, doc="Select TPG threshold for plane 2. Defaults to tpg_threshold_default value if empty."),
+    s.field( "tpg_rs_memory_factor_default", types.float4, default=0.8, doc="Default memory factor (R) for the TPG running sum algorithms."),
+    s.field( "tpg_rs_memory_factor_plane0", types.float4, default=-1, doc="Plane 0 memory factor (R) for the TPG running sum algorithms. Defaults to tpg_rs_memory_factor_default value if empty."),
+    s.field( "tpg_rs_memory_factor_plane1", types.float4, default=-1, doc="Plane 1 memory factor (R) for the TPG running sum algorithms. Defaults to tpg_rs_memory_factor_default value if empty."),
+    s.field( "tpg_rs_memory_factor_plane2", types.float4, default=-1, doc="Plane 2 memory factor (R) for the TPG running sum algorithms. Defaults to tpg_rs_memory_factor_default value if empty."),
+    s.field( "tpg_rs_scale_factor_default", types.count, default=2, doc="Default scale factor for the TPG running sum algorithms."),
+    s.field( "tpg_rs_scale_factor_plane0", types.count, default=0, doc="Plane 0 scale factor for the TPG running sum algorithms. Defaults to tpg_rs_scale_factor_default value if empty."),
+    s.field( "tpg_rs_scale_factor_plane1", types.count, default=0, doc="Plane 1 scale factor for the TPG running sum algorithms. Defaults to tpg_rs_scale_factor_default value if empty."),
+    s.field( "tpg_rs_scale_factor_plane2", types.count, default=0, doc="Plane 2 scale factor for the TPG running sum algorithms. Defaults to tpg_rs_scale_factor_default value if empty."),
     s.field( "tpg_frugal_streaming_accumulator_limit", types.count, default=10, doc="Accumulator limit for the frugal streaming method"),
     s.field( "tpg_algorithm", types.string, default="SimpleThreshold", doc="Select TPG algorithm (SimpleThreshold, AbsRS)"),
-    s.field( "enable_simple_threshold_on_collection", types.flag, default=false, doc="Enable SimpleThreshold TPG algorithm only on collection planes when a Running Sum algorithm is enabled"),        
     s.field( "tpg_channel_mask", self.id_list, default=[], doc="List of offline channels to be masked out from the TPHandler"),
     s.field( "tpset_min_latency_ticks", types.uint8, 3125000, doc="Latency introduced to allow for TPs to arrive and be reordered, default is 50 ms"),
     s.field( "tardy_tp_quiet_time_at_start_sec", types.int4, 10, doc="Amount of time that warning messages about tardy TPs will be suppressed at the start of a run, default is 10s"),
     s.field( "enable_raw_recording", types.flag, default=false, doc="Add queues and modules necessary for the record command"),
     s.field( "raw_recording_output_dir", types.path, default='.', doc="Output directory where recorded data is written to. Data for each link is written to a separate file"),
+    s.field( "raw_recording_config", self.raw_recording_config, default=self.raw_recording_config, doc="Configuration of raw recording"),
     s.field( "send_partial_fragments", types.flag, default=false, doc="Whether to send a partial fragment if one is available")
   ]),
 
