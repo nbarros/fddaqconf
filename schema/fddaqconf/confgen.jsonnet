@@ -82,7 +82,7 @@ local cs = {
 
 
   cib_hsi_inst: s.record("cib_hsi_inst",[
-  	s.field("trigger"	,types.int4, nc(minimum=0, exclusiveMaximum=4), default=0, doc='Which CIB trigger is mapped by this instance (0: fake, 1:P1, 2:P2, 3:P3)'),
+  	s.field("trigger"	,types.int4, default=0, doc='Which CIB trigger is mapped by this instance (0: fake, 1:P1, 2:P2, 3:P3)'),
   	s.field("host" 	 	,types.host, default='localhost',			doc='Host where this HSI app instance will run'),
   	s.field("cib_host"	,types.host, default="np04-iols-cib-01", 	doc='CIB endpoint host'),
   	s.field("cib_port"	,types.port, default=8992, 					doc='CIB endpoint port'),  	
