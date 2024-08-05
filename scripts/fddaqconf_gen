@@ -397,22 +397,24 @@ def cli(
     # CIB
     #--------------------------------------------------------------------------
     if cib_hsi.use_cib_hsi:
-        cib_source_id = sourceid_broker.get_next_source_id("HW_Signals_Interface")
-        sourceid_broker.register_source_id("HW_Signals_Interface", cib_source_id, None)
-
         for i in range(cib_hsi.cib_num_modules):
-          import dunedaq.fddaqconf.confgen as confgen
+            # Get a different source ID per module instance
+            cib_source_id = sourceid_broker.get_next_source_id("HW_Signals_Interface")
+            sourceid_broker.register_source_id("HW_Signals_Interface", cib_source_id, None)
+            
+            import dunedaq.fddaqconf.confgen as confgen
           
-          cib_i_conf = confgen.cib_hsi_inst(cib_hsi.cib_instances[i])
+            cib_i_conf = confgen.cib_hsi_inst(cib_hsi.cib_instances[i])
           
-          name = f"cibhsi{i}"
-          the_system.apps[name] = get_cib_hsi_app(
-                    "cib",
-                    i,
-                    cib_source_id,
-                    cib_i_conf,                    # this is the high level configuration as taken from fddaq/confgen.jsonnet
+            name = f"cibhsi{i}"
+            the_system.apps[name] = get_cib_hsi_app(
+                        module_name="cib",
+                        instance_id=i,
+                        source_id=cib_source_id,
+                        conf=cib_i_conf,                    # this is the high level configuration as taken from fddaq/confgen.jsonnet
+                        debug=debug
                     )
-          if debug: console.log("cib hsi cmd data:", the_system.apps[name])
+            if debug: console.log("cib hsi cmd data:", the_system.apps[name])
 
 
     #--------------------------------------------------------------------------
